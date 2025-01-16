@@ -1,6 +1,8 @@
 package com.example.myapplication
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -8,11 +10,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 class ThirdScreen : AppCompatActivity() {
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var userAdapter: UserAdapter
+
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
-    private val userList = mutableListOf<User>()
-    private val firebaseHelper = FirebaseHelper()
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,26 +20,15 @@ class ThirdScreen : AppCompatActivity() {
 
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         recyclerView = findViewById(R.id.recyclerView)
+        val ivBack = findViewById<ImageView>(R.id.iv_back)
 
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        userAdapter = UserAdapter(userList) { user ->
-            Toast.makeText(this, "Selected user: ${user.firstName} ${user.lastName}", Toast.LENGTH_SHORT).show()
+        ivBack.setOnClickListener {
+            val intent = Intent(this, SecondScreen::class.java)
+            startActivity(intent)
+            finish()
         }
-        recyclerView.adapter = userAdapter
 
         swipeRefreshLayout.setOnRefreshListener {
-            fetchUsers()
-        }
-
-        fetchUsers()
-    }
-
-    private fun fetchUsers() {
-        swipeRefreshLayout.isRefreshing = true
-        firebaseHelper.getAllUsers { users ->
-            userList.clear()
-            userList.addAll(users)
-            userAdapter.notifyDataSetChanged()
             swipeRefreshLayout.isRefreshing = false
         }
     }
