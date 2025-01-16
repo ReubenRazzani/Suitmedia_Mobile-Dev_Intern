@@ -8,11 +8,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.firebase.firestore.FirebaseFirestore
 
 class ThirdScreen : AppCompatActivity() {
 
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var recyclerView: RecyclerView
+    private val userList = mutableListOf<User>()
+    private lateinit var userAdapter: UserAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,6 +25,10 @@ class ThirdScreen : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerView)
         val ivBack = findViewById<ImageView>(R.id.iv_back)
 
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        userAdapter = UserAdapter(userList)
+        recyclerView.adapter = userAdapter
+
         ivBack.setOnClickListener {
             val intent = Intent(this, SecondScreen::class.java)
             startActivity(intent)
@@ -29,7 +36,35 @@ class ThirdScreen : AppCompatActivity() {
         }
 
         swipeRefreshLayout.setOnRefreshListener {
-            swipeRefreshLayout.isRefreshing = false
+            fetchUsersFromFirebase()
         }
+
+        fetchUsersFromFirebase()
+    }
+
+    private fun fetchUsersFromFirebase() {
+        val db = FirebaseFirestore.getInstance()
+
+        swipeRefreshLayout.isRefreshing = true
+
+        db.collection("users")
+            .get()
+            .addOnSuccessListener { documents ->
+                userList.clear()
+                for (document in documents) {
+                    val user = User(
+                        firstName = document.getString("firstName") ?: "",
+                        lastName = document.getString("lastName") ?: "",
+                        email = document.getString("email") ?: ""
+                    )
+                    userList.add(user)
+                }
+                userAdapter.notifyDataSetChanged() // Perbarui RecyclerView
+                swipeRefreshLayout.isRefreshing = false
+            }
+            .addOnFailureListener { exception ->
+                Toast.makeText(this, "Error: ${exception.message}", Toast.LENGTH_SHORT).show()
+                swipeRefreshLayout.isRefreshing = false
+            }
     }
 }

@@ -3,31 +3,27 @@ package com.example.myapplication
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class UserAdapter(private val userList: MutableList<User>, private val onItemClick: (User) -> Unit) :
+class UserAdapter(private val userList: List<User>) :
     RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
-    inner class UserViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val tvName: TextView = view.findViewById(R.id.tv_name)
-        val tvEmail: TextView = view.findViewById(R.id.tv_email)
-
-        fun bind(user: User) {
-            tvName.text = "${user.firstName} ${user.lastName}"
-            tvEmail.text = user.email
-        }
+    inner class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val tvFirstName: TextView = itemView.findViewById(R.id.tv_name)
+        val tvEmail: TextView = itemView.findViewById(R.id.tv_email)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_user, parent, false)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_user, parent, false)
         return UserViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
         val user = userList[position]
-        holder.bind(user)
+        holder.tvFirstName.text = user.firstName
+        holder.tvEmail.text = user.email
     }
 
     override fun getItemCount(): Int = userList.size
